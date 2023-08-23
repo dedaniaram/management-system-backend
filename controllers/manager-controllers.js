@@ -89,10 +89,12 @@ const createDepartment = async (req, res) => {
     try {
         const { department_name, category_name, location, salary } = req.body;
 
-        // Check if the department already exists
+        // Check if the category of the department already exists
         const existingDepartment = await Department.findOne({ where: { department_name } });
         if (existingDepartment) {
-            return res.status(409).json({ message: 'Department already exists' });
+            const existingCategory = await Department.findOne({ where: { category_name } });
+            if (existingCategory)
+                return res.status(409).json({ message: 'Category already exists' });
         }
 
         // Create the new department
@@ -158,9 +160,12 @@ const updateDepartment = async (req, res) => {
     const { departmentId } = req.params;
     const { department_name, category_name, location, salary } = req.body;
     try {
+        // Check if the category of the department already exists
         const department = await Department.findByPk(departmentId);
-        if (!department) {
-            return res.status(404).json({ message: 'Department not found' });
+        if (department) {
+            const existingCategory = await Department.findOne({ where: { category_name } });
+            if (existingCategory)
+                return res.status(409).json({ message: 'Category already exists' });
         }
         department.department_name = department_name;
         department.category_name = category_name;
